@@ -1,0 +1,20 @@
+:root {
+  --red: #f54e4e;
+  --green: #4aec8c;
+}
+
+body {
+  background-color: #20262e;
+  color: white;
+}
+
+.container {
+  margin: 0 auto;
+}
+
+label {
+  display: block;
+  margin-top: 20px;
+  margin-bottom: 10px;
+  text-transform: capitalize;
+}
