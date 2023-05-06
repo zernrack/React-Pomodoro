@@ -43,18 +43,17 @@ export default function Timer() {
     secondsLeftRef.current = settingsInfo.workMinutes * 60;
     setSecondsLeft(secondsLeftRef.current);
 
-    const interval = setInterval(() => {
-      if (isPausedRef.current) {
-        return;
-      }
-      if (secondsLeftRef.current === 0) {
-        return switchMode();
-      }
+    if (!isPausedRef.current) {
+      const interval = setInterval(() => {
+        if (secondsLeftRef.current === 0) {
+          switchMode();
+        } else {
+          tick();
+        }
+      }, 1000);
 
-      tick();
-    }, 1000);
-
-    return () => clearInterval(interval);
+      return () => clearInterval(interval);
+    }
   }, [settingsInfo]);
 
   const totalSeconds =
