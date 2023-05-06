@@ -6,7 +6,7 @@ import Timer from "./Timer";
 
 export default function App() {
   const [showSettings, setShowSettings] = useState(false);
-  const [workMinutes, setWorkMinutes] = useState(45);
+  const [workMinutes, setWorkMinutes] = useState(25);
   const [breakMinutes, setBreakMinutes] = useState(15);
   return (
     <>
