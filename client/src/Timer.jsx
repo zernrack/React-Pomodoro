@@ -5,6 +5,7 @@ import PauseButton from "./components/PauseButton";
 import PlayButton from "./components/PlayButton";
 import SettingsButton from "./components/SettingsButton";
 import SettingsContext from "./SettingsContext";
+import TimerEndSound from "./assets/sounds/TimerEndsSounds.mp3";
 
 export default function Timer() {
   const red = "#f54e4e";
@@ -15,6 +16,7 @@ export default function Timer() {
   const [isPaused, setIsPaused] = useState(true);
   const [mode, setMode] = useState("work"); // work/break/null
   const [secondsLeft, setSecondsLeft] = useState(0);
+  const [timerEnded, setTimerEnded] = useState(false);
 
   const secondsLeftRef = useRef(secondsLeft);
   const isPausedRef = useRef(isPaused);
@@ -38,23 +40,42 @@ export default function Timer() {
 
       setSecondsLeft(nextSeconds);
       secondsLeftRef.current = nextSeconds;
+      setIsPaused(true); // Pause the timer after switching mode
+      isPausedRef.current = true;
+      setTimerEnded(true); // Set timerEnded to true when mode switches
     }
 
     secondsLeftRef.current = settingsInfo.workMinutes * 60;
     setSecondsLeft(secondsLeftRef.current);
 
-    if (!isPausedRef.current) {
-      const interval = setInterval(() => {
-        if (secondsLeftRef.current === 0) {
-          switchMode();
-        } else {
-          tick();
-        }
-      }, 1000);
+    const interval = setInterval(() => {
+      if (isPausedRef.current) {
+        return;
+      }
+      if (secondsLeftRef.current === 0) {
+        return switchMode();
+      }
 
-      return () => clearInterval(interval);
-    }
+      tick();
+    }, 1000);
+
+    return () => clearInterval(interval);
   }, [settingsInfo]);
+
+  useEffect(() => {
+    if (timerEnded) {
+      const audio = new Audio(TimerEndSound);
+      audio.play();
+    }
+  }, [timerEnded]);
+
+  useEffect(() => {
+    return () => {
+      const audio = new Audio(TimerEndSound);
+      audio.pause();
+      audio.currentTime = 0;
+    };
+  }, []);
 
   const totalSeconds =
     mode === "work"
@@ -74,7 +95,7 @@ export default function Timer() {
           styles={buildStyles({
             textColor: "#fff",
             pathColor: mode === "work" ? red : green,
-            trailColor: "rgb(255, 255, 255);",
+            trailColor: "rgb(255, 255, 255)",
           })}
         />
         <div className="buttons-controls mt-[20px]">
