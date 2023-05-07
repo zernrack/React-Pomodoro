@@ -21,6 +21,8 @@ export default function Timer() {
   const secondsLeftRef = useRef(secondsLeft);
   const isPausedRef = useRef(isPaused);
   const modeRef = useRef(mode);
+  const audioRef = useRef(null);
+  const audioContextRef = useRef(null);
 
   function tick() {
     secondsLeftRef.current--;
@@ -53,9 +55,7 @@ export default function Timer() {
         return;
       }
       if (secondsLeftRef.current === 0) {
-        switchMode();
-      } else if (secondsLeftRef.current === 1) {
-        setTimerEnded(false); // Reset timerEnded before the next tick
+        return switchMode();
       }
 
       tick();
@@ -67,15 +67,27 @@ export default function Timer() {
   useEffect(() => {
     if (timerEnded) {
       const audio = new Audio(TimerEndSound);
-      audio.play();
+      audioRef.current = audio;
+      audio.play().catch((error) => {
+        console.error("Failed to play audio:", error);
+      });
+    } else if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current.currentTime = 0;
     }
   }, [timerEnded]);
 
   useEffect(() => {
+    if (audioContextRef.current === null) {
+      audioContextRef.current = new (window.AudioContext ||
+        window.webkitAudioContext)();
+    }
+
     return () => {
-      const audio = new Audio(TimerEndSound);
-      audio.pause();
-      audio.currentTime = 0;
+      if (audioContextRef.current) {
+        audioContextRef.current.close();
+        audioContextRef.current = null;
+      }
     };
   }, []);
 
@@ -88,7 +100,7 @@ export default function Timer() {
   const minutes = Math.floor(secondsLeft / 60);
   let seconds = secondsLeft % 60;
   if (seconds < 10) seconds = "0" + seconds;
-  
+
   return (
     <>
       <div>
