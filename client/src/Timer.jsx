@@ -53,7 +53,9 @@ export default function Timer() {
         return;
       }
       if (secondsLeftRef.current === 0) {
-        return switchMode();
+        switchMode();
+      } else if (secondsLeftRef.current === 1) {
+        setTimerEnded(false); // Reset timerEnded before the next tick
       }
 
       tick();
@@ -86,6 +88,7 @@ export default function Timer() {
   const minutes = Math.floor(secondsLeft / 60);
   let seconds = secondsLeft % 60;
   if (seconds < 10) seconds = "0" + seconds;
+  
   return (
     <>
       <div>
